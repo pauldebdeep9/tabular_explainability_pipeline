@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.ensemble import GradientBoostingRegressor
 
+results_dir = Path(__file__).resolve().parent.parent / "Results"
+results_dir.mkdir(exist_ok=True)
+
+
 class FeatureExplainer:
     def __init__(self, df, feature_selector, n_train=40, drop_cols=None, max_display=5, sample_no=33):
         self.df = df.dropna(axis=1)
@@ -27,7 +31,8 @@ class FeatureExplainer:
         explainer = shap.Explainer(model.predict, shap.utils.sample(self.X_selected, 100))
         shap_values = explainer(self.X_selected)
         shap.summary_plot(shap_values, self.X_selected, max_display=self.max_display, show=False)
-        plt.savefig(f"shap_summary_{self.feature_selector.__class__.__name__}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(results_dir / f"shap_summary_{self.feature_selector.__class__.__name__}.png", dpi=300, bbox_inches="tight")
+        plt.close()
         return shap_values
     
     def explain_local(self):
@@ -37,12 +42,13 @@ class FeatureExplainer:
         explainer = shap.Explainer(model.predict, self.X_selected)
         shap_values = explainer(self.X_selected)
 
-        shap.plots.waterfall(shap_values[self.sample_no], max_display=self.max_display)
-        
-        # Save the plot
         results_dir = Path(__file__).resolve().parent.parent / "Results"
         results_dir.mkdir(exist_ok=True)
-        plt.savefig(results_dir / f"shap_local_{self.feature_selector.__class__.__name__}.png", dpi=300, bbox_inches='tight')
-        plt.close()
 
+        # Plot → Axes → Figure → Save
+        ax = shap.plots.waterfall(shap_values[self.sample_no], max_display=self.max_display, show=False)
+        fig = ax.figure
+        fig.savefig(results_dir / f"shap_local_{self.feature_selector.__class__.__name__}.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
+  
         return shap_values[self.sample_no], self.X_selected.iloc[self.sample_no]
