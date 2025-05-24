@@ -6,7 +6,6 @@ from sklearn.ensemble import GradientBoostingRegressor
 results_dir = Path(__file__).resolve().parent.parent / "Results"
 results_dir.mkdir(exist_ok=True)
 
-
 class FeatureExplainer:
     def __init__(self, df, feature_selector, n_train=40, drop_cols=None, max_display=5, sample_no=33):
         self.df = df.dropna(axis=1)

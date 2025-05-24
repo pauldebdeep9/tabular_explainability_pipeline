@@ -1,6 +1,4 @@
-
 # src/lasso_selector.py
-
 from sklearn.linear_model import LassoCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
