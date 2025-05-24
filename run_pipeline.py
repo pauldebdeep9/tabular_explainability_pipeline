@@ -1,26 +1,35 @@
-
 # src/run_pipeline.py
 
+import argparse
 from pathlib import Path
 import pandas as pd
 from src import LassoFeatureSelector, FeatureExplainer, RFECVFeatureSelector
 
 def main():
+    # --- Argument parser ---
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--feature_selection_method", type=str, default="lasso", choices=["lasso", "rfecv"],
+                        help="Feature selection method to use: 'lasso' or 'rfecv'")
+    args = parser.parse_args()
+
     # --- Configuration ---
     data_file = Path(__file__).resolve().parent / "Data" / "CPExplain221014.csv"
     drop_cols = ['Man_pmi_mx', 'Man_pmi_tr']
     n_train = 40
-    max_display = 5
+    max_display = 6
     sample_no = 33
 
     # --- Load Data ---
     df = pd.read_csv(data_file)
     print(f"✅ Loaded data shape: {df.shape}")
 
-    # --- Feature Selector ---
-    # selector = LassoFeatureSelector(cv=5, random_state=42, max_iter=10000)
-
-    selector = RFECVFeatureSelector(step=0.05, cv=3, scoring="neg_mean_absolute_error", random_state=101)
+    # --- Select feature selection strategy ---
+    if args.feature_selection_method == "lasso":
+        selector = LassoFeatureSelector(cv=5, random_state=42, max_iter=10000)
+    elif args.feature_selection_method == "rfecv":
+        selector = RFECVFeatureSelector(step=0.05, cv=5, scoring="neg_mean_absolute_error", random_state=101)
+    else:
+        raise ValueError("Invalid feature selection method. Choose 'lasso' or 'rfecv'.")
 
     # --- Explanation Pipeline ---
     explainer = FeatureExplainer(
