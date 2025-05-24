@@ -33,6 +33,12 @@ class FeatureExplainer:
         shap.summary_plot(shap_values, self.X_selected, max_display=self.max_display, show=False)
         plt.savefig(results_dir / f"shap_summary_{self.feature_selector.__class__.__name__}.png", dpi=300, bbox_inches="tight")
         plt.close()
+
+        shap.plots.bar(shap_values, max_display=self.max_display, show=False)
+        fig = plt.gcf()
+        fig.savefig(results_dir / f"shap_summary_bar{self.feature_selector.__class__.__name__}.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
+
         return shap_values
     
     def explain_local(self):
